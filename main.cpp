@@ -13,12 +13,20 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+#include <type_traits>
+#include <string>
+#include <memory>
+#include <iostream>
+#include "jlcxx/jlcxx.hpp"
+#include "jlcxx/functions.hpp"
+#include "jlcxx/stl.hpp"
+
 static void glfw_error_callback(int error, const char *description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-const char *imgui_init()
+GLFWwindow *imgui_new_window(int width, int height, char *title)
 {
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
@@ -29,14 +37,7 @@ const char *imgui_init()
     const char *glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 
-    return glsl_version;
-}
-
-GLFWwindow *imgui_window(int width, int height, char *title, const char *glsl_version)
-{
     // Create window with graphics context
     GLFWwindow *window = glfwCreateWindow(width, height, title, NULL, NULL);
     if (window == NULL)
@@ -49,8 +50,6 @@ GLFWwindow *imgui_window(int width, int height, char *title, const char *glsl_ve
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -70,10 +69,13 @@ void imgui_close_window(GLFWwindow *window)
     glfwTerminate();
 }
 
+void PoolEvents(){
+    glfwPollEvents();
+}
+
 int demo_app()
 {
-    const char *glsl_version = imgui_init();
-    GLFWwindow *window = imgui_window(1280, 720, (char*) "demo_app", glsl_version);
+    GLFWwindow *window = imgui_new_window(1280, 720, (char*) "demo_app");
 
     ImGui::StyleColorsLight();
 
@@ -85,7 +87,7 @@ int demo_app()
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
-        glfwPollEvents();
+        PoolEvents();
 
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -143,4 +145,23 @@ int demo_app()
 
     imgui_close_window(window);
     return 0;
+}
+
+JLCXX_MODULE IMJULIA(jlcxx::Module& mod)
+{
+    // mod.method("Begin", &ImGui::Begin);
+    // mod.method("End", &ImGui::End());
+    // mod.method("Text", &ImGui::Text());
+    // mod.method("Button", &ImGui::Button);
+    // mod.method("Render", &ImGui::Render);
+    mod.method("demo_app", &demo_app);
+     mod.method("PoolEvents", &PoolEvents);
+    // mod.method("", &ImGui::);
+    // mod.method("", &ImGui::);
+    // mod.method("", &ImGui::);
+    // mod.method("", &ImGui::);
+    // mod.method("", &ImGui::);
+    // mod.method("", &ImGui::);
+
+
 }

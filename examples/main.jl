@@ -1,7 +1,7 @@
 # Load the module and generate the functions
-module Imgui
+module ImGui
   using CxxWrap
-  @wrapmodule("../lib/libui.so", :DEMO)
+  @wrapmodule("../lib/libui.so", :IMJULIA)
 
   function __init__()
     @initcxx
@@ -9,4 +9,4 @@ module Imgui
 end
 
 # Call demo_app function and show the app (with return value)
-@show Imgui.demo_app()
+ImGui.demo_app()
